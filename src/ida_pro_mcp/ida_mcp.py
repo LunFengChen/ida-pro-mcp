@@ -22,10 +22,15 @@ _SUP_HOST = 0  # supval index for the persisted host
 
 
 def _get_autostart() -> bool:
-    """Read the autostart preference from the IDB. Defaults to True."""
-    node = ida_netnode.netnode(NETNODE_AUTOSTART)
-    val = node.altval(0)  # 0 = not set, 1 = off, 2 = on
-    return val != 1
+    """Always enable MCP autostart for local GUI IDA sessions.
+
+    The upstream plugin stores this as a per-IDB netnode value.  Some older
+    databases on this workstation had saved "off", which made MCP disappear
+    after opening them.  Keep the setter/menu intact, but make the effective
+    default for this local workflow unconditional so every GUI IDA database
+    starts the MCP server automatically.
+    """
+    return True
 
 
 def _set_autostart(enabled: bool):

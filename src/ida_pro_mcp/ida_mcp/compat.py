@@ -68,6 +68,17 @@ def _check_required_apis(version: tuple[int, int, int]) -> None:
         missing.append("tinfo_t.get_udm")
 
     if missing:
+        # Local compatibility override:
+        # IDA 9.0 SP0 lacks these methods, but the wrappers below already
+        # contain fallback paths using older APIs (hasattr()/find_udm/etc).
+        # Upstream intentionally rejects SP0, but for this local environment
+        # we prefer best-effort compatibility over hard failure.
+        #
+        # Keep rejecting unexpected newer versions if they somehow miss the
+        # required methods, since that would indicate a different breakage.
+        if version[:2] == (9, 0):
+            return
+
         ver_str = idaapi.get_kernel_version()
         raise RuntimeError(
             f"IDA Pro {ver_str} is missing required Python API methods: "
